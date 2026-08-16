@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',                   # drf
     'accounts',                         # custom user model
+    'store',                            # this is for ecommerce logic
 ]
 
 MIDDLEWARE = [

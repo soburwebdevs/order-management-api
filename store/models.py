@@ -41,3 +41,27 @@ class CartItem(models.Model):
         unique_together = [['cart', 'product']]
 
 
+class Order(models.Model):
+    STATUS_PENDING = 'P'
+    STATUS_SHIPPED = 'S'
+    STATUS_CANCELLED = 'C'
+    STATUS_DELIVERED = 'D'
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_SHIPPED, 'Shipped'),
+        (STATUS_CANCELLED, 'Cancelled'),
+        (STATUS_DELIVERED, 'Delivered')
+    ]
+    
+    placed_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.PROTECT, related_name='orderitems')
+    quantity = models.PositiveSmallIntegerField()
+    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
+
+

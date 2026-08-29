@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.mixins import CreateModelMixin, DestroyModelMixin, RetrieveModelMixin, UpdateModelMixin
+from rest_framework.permissions import IsAuthenticated
 from store import models, serializers
 
 
@@ -32,5 +33,15 @@ class CartItemViewSet(CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, U
     
     def get_queryset(self):
         return models.CartItem.objects.filter(cart_id=self.kwargs['cart_pk'])
+    
+
+class OrderViewSet(CreateModelMixin, GenericViewSet):
+    permission_classes = [IsAuthenticated]
+    
+    def get_serializer_class(self):
+        return serializers.CreateOrderSerializer
+    
+    def get_serializer_context(self):
+        return {'user_id': self.request.user.id}
 
 

@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 from store import models
 
@@ -75,5 +76,58 @@ class AddCartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.CartItem
         fields = ['id', 'product_id', 'quantity']
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product = SimpleProductSerializer()
+    
+    class Meta:
+        model = models.OrderItem
+        fields = ['id', 'product', 'unit_price', 'quantity']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = models.Order
+        fields = ['id', 'user', 'status', 'placed_at', 'items']
+
+
+class CreateOrderSerializer(serializers.Serializer):
+    cart_id = serializers.UUIDField()
+    
+    def validate_cart_id(self, cart_id):
+        if not models.Cart.objects.filter(pk=cart_id).exists():
+            raise serializers.ValidationError('No Cart found with the given ID.')
+        if models.CartItem.objects.filter(cart_id=cart_id).count() == 0:
+            raise serializers.ValidationError('The cart is empty.')
+        return cart_id
+    
+    def save(self, **kwargs):
+        with transaction.atomic():
+            cart_id = self.validated_data['cart_id']
+            user_id = self.context['user_id']
+            
+            order = models.Order.objects.create(user_id=user_id)
+            
+            cart_items = models.CartItem.objects.select_related('product').filter(cart_id=cart_id)
+            order_items = [
+                models.OrderItem(
+                    order=order,
+                    product=item.product,
+                    unit_price=item.product.unit_price,
+                    quantity=item.quantity
+                ) for item in cart_items
+            ]
+            models.OrderItem.objects.bulk_create(order_items)
+            
+            models.Cart.objects.filter(pk=cart_id).delete()
+            
+            self.instance = order
+            return order
+        
+    def to_representation(self, instance):
+        return OrderSerializer(instance).data
 
 

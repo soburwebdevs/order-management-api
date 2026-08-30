@@ -3,6 +3,14 @@ from django.conf import settings
 import uuid
 
 
+class Promotion(models.Model):
+    description = models.CharField(max_length=255)
+    discount = models.DecimalField(max_digits=4, decimal_places=2)
+    
+    def __str__(self):
+        return f"{self.description} ({self.discount}% off)"
+
+
 class Category(models.Model):
     name = models.CharField(max_length=255, unique=True)
     
@@ -21,6 +29,7 @@ class Product(models.Model):
     stock = models.PositiveIntegerField()
     last_update = models.DateTimeField(auto_now=True)
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name='products')
+    promotion = models.ManyToManyField(Promotion, blank=True)
     
     def __str__(self):
         return self.title

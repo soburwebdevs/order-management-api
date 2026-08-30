@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Product, Cart, CartItem, Order, OrderItem
+from .models import Category, Product, Cart, CartItem, Order, OrderItem, Promotion
 
 
 @admin.register(Category)
@@ -35,3 +35,8 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'status', 'placed_at')
     list_filter = ('status',)
     inlines = [OrderItemInine]
+    
+
+@admin.register(Promotion)
+class PromotionAdmin(admin.ModelAdmin):
+    list_display = ('description', 'discount')

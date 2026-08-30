@@ -14,10 +14,19 @@ class ProductSerializer(serializers.ModelSerializer):
         slug_field='name',
         queryset=models.Category.objects.all()
     )
+    discounted_price = serializers.SerializerMethodField()
+    
+    def get_discounted_price(self, product: models.Product):
+        promotions = product.promotion.all()
+        if not promotions.exists():
+            return product.unit_price
+        
+        best_discount = max(promo.discount for promo in promotions)
+        return product.unit_price * (1 - best_discount / 100)
     
     class Meta:
         model = models.Product
-        fields = ['id', 'title', 'slug', 'description', 'unit_price', 'stock', 'category', 'last_update']
+        fields = ['id', 'title', 'slug', 'description', 'unit_price', 'discounted_price', 'stock', 'category', 'last_update']
 
 
 class SimpleProductSerializer(serializers.ModelSerializer):

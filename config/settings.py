@@ -159,3 +159,7 @@ CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TAST_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+## for django's console email backend
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'orders@ordermanagement.com'

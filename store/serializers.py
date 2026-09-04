@@ -1,6 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
 from store import models
+from .tasks import send_order_confirmation_email
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -134,7 +135,10 @@ class CreateOrderSerializer(serializers.Serializer):
             models.Cart.objects.filter(pk=cart_id).delete()
             
             self.instance = order
-            return order
+        
+        send_order_confirmation_email.delay(order.id)
+            
+        return order
         
     def to_representation(self, instance):
         return OrderSerializer(instance).data

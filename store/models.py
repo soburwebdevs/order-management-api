@@ -31,6 +31,9 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name='products')
     promotion = models.ManyToManyField(Promotion, blank=True)
     
+    class Meta:
+        ordering = ['title']
+    
     def __str__(self):
         return self.title
 

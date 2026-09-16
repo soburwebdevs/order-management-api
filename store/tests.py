@@ -206,3 +206,34 @@ class ProductDiscountTestCase(APITestCase):
         
         self.assertEqual(response.data['discounted_price'], Decimal('70'))
 
+
+class ProductTestCase(APITestCase):
+    def setUp(self):
+        self.category = models.Category.objects.create(name="Electronics")
+        self.product = models.Product.objects.create(
+            title="Table Fan",
+            slug="table-fan",
+            unit_price=40.99,
+            stock=10,
+            category=self.category
+        )
+        
+    def test_list_products(self):
+        response = self.client.get(reverse('product-list'))
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+    def test_retrieve_single_product(self):
+        url = reverse('product-detail', kwargs={'pk': self.product.id})
+        response = self.client.get(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['id'], self.product.id)
+        self.assertEqual(response.data['title'], 'Table Fan')
+        
+    def test_category_show_as_name_not_id(self):
+        url = reverse('product-detail', kwargs={'pk': self.product.id})
+        response = self.client.get(url)
+        
+        self.assertEqual(response.data['category'], 'Electronics')
+

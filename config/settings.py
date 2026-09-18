@@ -13,6 +13,7 @@ from datetime import timedelta
 from pathlib import Path
 from decouple import config
 import sys
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -80,16 +81,26 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='placeholder'),
-        'USER': config('DB_USER', default='placeholder'),
-        'PASSWORD': config('DB_PASSWORD', default='placeholder'),
-        'HOST': config('DB_HOST', default='placeholder'),
-        'PORT': config('DB_PORT', default='5432'),
+
+if config('DATABASE_URL', default=None):
+    DATABASES = {
+        'default': dj_database_url.parse(
+            config('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': config('DB_NAME', default='placeholder'),
+            'USER': config('DB_USER', default='placeholder'),
+            'PASSWORD': config('DB_PASSWORD', default='placeholder'),
+            'HOST': config('DB_HOST', default='placeholder'),
+            'PORT': config('DB_PORT', default='5432'),
+        }
+    }
 
 
 # Password validation

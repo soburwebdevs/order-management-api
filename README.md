@@ -4,8 +4,15 @@
 
 A production-style e-commerce backend API — product catalog, promotions, cart, and order management — built with Django REST Framework, PostgreSQL, Celery, and Redis.
 
+## Live Demo
+
+🔗 [https://order-management-api-3mor.onrender.com/](https://order-management-api-3mor.onrender.com/)
+
+*Note: hosted on Render's free tier — the app may take ~30 seconds to wake up if it's been idle. The Celery worker itself isn't deployed (Render's free tier doesn't offer background worker services), so async order-confirmation emails run in the local Docker Compose environment, not on the live demo. Every other feature — auth, catalog, cart, checkout, orders, Redis caching — is fully live.*
+
 ## Features
 
+- **Deployed live on Render** — using Neon for serverless PostgreSQL and Render Key Value for managed Redis
 - **Custom User Model** — set up from project init, following Django best practices
 - **JWT Authentication** — register, login, token refresh, and logout (with refresh token blacklisting) via `djangorestframework-simplejwt`; session authentication also enabled for the browsable API
 - **Product & Category catalog** — full CRUD, with category shown by name (not ID) via `SlugRelatedField`
@@ -21,13 +28,14 @@ A production-style e-commerce backend API — product catalog, promotions, cart,
 ## Tech Stack
 
 - **Backend:** Python, Django, Django REST Framework
-- **Database:** PostgreSQL
+- **Database:** PostgreSQL (Neon in production, local Postgres in Docker for development)
 - **Auth:** JWT (djangorestframework-simplejwt) + Session Authentication
 - **Async tasks:** Celery
-- **Broker / Cache:** Redis
+- **Broker / Cache:** Redis (Render Key Value in production, local Redis in Docker for development)
 - **Containerization:** Docker, Docker Compose
 - **Production server:** Gunicorn
 - **Static files:** Whitenoise
+- **Deployment:** Render
 
 ## Getting Started
 
@@ -80,6 +88,16 @@ A production-style e-commerce backend API — product catalog, promotions, cart,
 ```bash
 docker-compose exec web python manage.py test
 ```
+
+31 tests covering JWT auth (register/login/refresh/logout with blacklisting), cart logic (including quantity merging), checkout (including a transaction-rollback test), promotions, and the async email task.
+
+## Deployment Notes
+
+Deployed on Render as a Dockerized web service, backed by:
+- **Neon** — serverless PostgreSQL, free tier with no expiration
+- **Render Key Value** — managed Redis, used for both caching and the Celery broker
+
+The Celery worker itself only runs in the local Docker Compose setup, since Render's free tier doesn't offer background worker services. In a real production deployment, this would be a paid worker instance consuming the same Redis broker as the live web service.
 
 ## What I Learned
 
